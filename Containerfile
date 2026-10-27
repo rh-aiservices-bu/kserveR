@@ -7,7 +7,7 @@ FROM ${UBI_IMAGE} AS builder
 
 ARG R_LIB
 ARG PKG_PROFILE=full
-ARG PPM_REPO=https://packagemanager.posit.co/cran/__linux__/rhel9/latest
+ARG CRAN_REPO=https://cloud.r-project.org
 
 RUN dnf install -y --nodocs --setopt=install_weak_deps=False \
       https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
@@ -21,7 +21,7 @@ RUN dnf install -y --nodocs --setopt=install_weak_deps=False \
 
 COPY runtime/install-packages.R /tmp/install-packages.R
 RUN mkdir -p "${R_LIB}" \
- && Rscript /tmp/install-packages.R "${PKG_PROFILE}" "${R_LIB}" "${PPM_REPO}"
+ && Rscript /tmp/install-packages.R "${PKG_PROFILE}" "${R_LIB}" "${CRAN_REPO}"
 
 # ------------------------------------------------------------------ runtime ---
 FROM ${UBI_IMAGE} AS runtime

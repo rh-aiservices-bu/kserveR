@@ -1,8 +1,8 @@
 args    <- commandArgs(trailingOnly = TRUE)
 profile <- if (length(args) >= 1L) args[[1L]] else "full"
 lib     <- if (length(args) >= 2L) args[[2L]] else .libPaths()[[1L]]
-repo    <- if (length(args) >= 3L) args[[3L]] else
-  "https://packagemanager.posit.co/cran/__linux__/rhel9/latest"
+repo    <- if (length(args) >= 3L && nzchar(args[[3L]])) args[[3L]] else
+  "https://cloud.r-project.org"
 
 SERVER       <- c("plumber", "jsonlite", "renv")
 MODELS_LEAN  <- c("randomForest", "ranger", "glmnet", "rpart", "nnet", "e1071", "MASS")
@@ -16,26 +16,19 @@ packages <- switch(
   stop(sprintf("unknown PKG_PROFILE '%s' (expected 'lean' or 'full')", profile))
 )
 
+cores <- max(1L, parallel::detectCores())
+
 options(
   repos = c(CRAN = repo),
-  HTTPUserAgent = sprintf(
-    "R/%s R (%s)",
-    getRversion(),
-    paste(getRversion(), R.version$platform, R.version$arch, R.version$os)
-  ),
-  Ncpus = max(1L, parallel::detectCores()),
+  Ncpus = cores,
   warn = 2L
 )
 
-db <- available.packages()
-has_binaries <- "Path" %in% colnames(db)
-
 cat("------------------------------------------------------------\n")
-cat(sprintf("profile       : %s (%d packages)\n", profile, length(packages)))
-cat(sprintf("R             : %s on %s\n", getRversion(), R.version$platform))
-cat(sprintf("repo          : %s\n", repo))
-cat(sprintf("PPM binaries  : %s\n", if (has_binaries) "YES - installs are downloads"
-                                    else "NO  - compiling from source, expect a slow build"))
+cat(sprintf("profile : %s (%d packages)\n", profile, length(packages)))
+cat(sprintf("R       : %s on %s\n", getRversion(), R.version$platform))
+cat(sprintf("repo    : %s\n", repo))
+cat(sprintf("building from source on %d core(s)\n", cores))
 cat("------------------------------------------------------------\n")
 flush.console()
 
