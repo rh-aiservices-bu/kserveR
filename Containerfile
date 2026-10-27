@@ -9,15 +9,11 @@ ARG R_LIB
 ARG PKG_PROFILE=full
 ARG CRAN_REPO=https://cloud.r-project.org
 
-# R-core-devel needs flexiblas-devel and libtirpc-devel, which live in CodeReady
-# Builder. The glob matches CRB whether it comes from UBI's own repo definition
-# (ubi-9-codeready-builder-rpms) or a subscribed host's
-# (codeready-builder-for-rhel-9-x86_64-rpms), and is silently ignored if neither
-# is present -- unlike an exact --enablerepo name, which errors.
+# flexiblas-devel and libtirpc-devel are in CodeReady Builder, disabled by default.
 RUN dnf install -y --nodocs --setopt=install_weak_deps=False \
       https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
  && dnf install -y --nodocs --setopt=install_weak_deps=False \
-      --enablerepo="*codeready*" --enablerepo="*crb*" \
+      --enablerepo="*codeready*" \
       R-core R-core-devel \
       flexiblas-devel libtirpc-devel \
       gcc gcc-c++ gcc-gfortran make \
