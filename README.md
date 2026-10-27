@@ -20,6 +20,10 @@ podman build \
 podman push quay.io/yourorg/kserve-r-runtime:0.1.0
 ```
 
+The baked package list is the `PACKAGES` vector at the top of
+`runtime/install-packages.R` — edit it there. Anything not baked in can still
+arrive via an `renv.lock` shipped alongside the model.
+
 ---
 
 ## 2. Install the runtime
@@ -144,7 +148,6 @@ Set these in the `ServingRuntime`, or per-model in the `InferenceService`.
 
 | Symptom | Fix |
 |---|---|
-| Build is very slow | expected — everything compiles from source; use `PKG_PROFILE=lean` |
 | `no applicable method for 'predict'` | the package defining `predict.<class>` is missing — set `MODEL_PACKAGES=yourpkg` or ship an `renv.lock` |
 | `no model found in /mnt/models` | `storageUri` points at the file; point it at the prefix |
 | `found N candidate model files` | name one `model.rds` or set `MODEL_FILE` |
