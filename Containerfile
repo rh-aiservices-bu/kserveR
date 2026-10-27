@@ -4,7 +4,7 @@ LABEL version="0.1.0"
 LABEL maintainer="Sara Banderby <abanderb@redhat.com>"
 
 # Shared libraries the CRAN binaries link against at load time.
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get -y upgrade && apt-get install -y --no-install-recommends \
       libcurl4-openssl-dev \
       libssl-dev \
       libxml2-dev \
