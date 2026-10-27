@@ -87,6 +87,26 @@ build_router <- function(state) {
   pr <- plumber::pr_set_serializer(pr, json_serializer())
   pr <- plumber::pr_set_error(pr, error_handler)
 
+  pr <- plumber::pr_hook(pr, "preroute", function(req) {
+    req$.kserver_t0 <- Sys.time()
+  })
+  pr <- plumber::pr_hook(pr, "postserialize", function(req, res, value) {
+    if (!is.null(req$.kserver_t0) && !identical(req$PATH_INFO, "/metrics")) {
+      metrics_record(
+        req$PATH_INFO,
+        res$status %||% 200L,
+        as.numeric(difftime(Sys.time(), req$.kserver_t0, units = "secs"))
+      )
+    }
+    value
+  })
+
+  pr <- plumber::pr_get(
+    pr, "/metrics",
+    function() metrics_render(state$name),
+    serializer = plumber::serializer_text()
+  )
+
   ok <- function() list()
 
   pr <- plumber::pr_get(pr, "/v2/health/live",  function() ok())

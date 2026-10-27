@@ -9,8 +9,17 @@ spec:
     labels:
       app.openshift.io/runtime: r
       app.openshift.io/runtime-version: "4.4.2"
+    minReplicas: 1
+    maxReplicas: 1
     model:
       modelFormat:
         name: R
       runtime: kserve-r-runtime
       storageUri: oci://quay.io/sara_banderby/kserver:test
+      resources:
+        requests:
+          cpu: "500m"
+          memory: 1Gi
+        limits:
+          cpu: "2"
+          memory: 4Gi

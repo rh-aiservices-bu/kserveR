@@ -19,7 +19,8 @@ runtime_home <- function() {
 
 HOME_DIR <- runtime_home()
 
-for (file in c("config.R", "schema.R", "formats.R", "tensors.R", "model.R", "api_v2.R")) {
+for (file in c("config.R", "schema.R", "formats.R", "tensors.R", "metrics.R",
+               "model.R", "api_v2.R")) {
   source(file.path(HOME_DIR, "R", file), local = FALSE)
 }
 

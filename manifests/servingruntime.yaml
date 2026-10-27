@@ -9,6 +9,11 @@ metadata:
     opendatahub.io/modelServingSupport: '["single"]'
     opendatahub.io/apiProtocol: "REST"
 spec:
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/metrics"
+
   supportedModelFormats:
     - name: R
       version: "1"
