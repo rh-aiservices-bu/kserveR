@@ -10,7 +10,7 @@ metadata:
     opendatahub.io/apiProtocol: "REST"
 spec:
   supportedModelFormats:
-    - name: r
+    - name: R
       version: "1"
       autoSelect: true
       priority: 1

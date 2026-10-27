@@ -5,10 +5,15 @@ metadata:
   labels:
     opendatahub.io/dashboard: "true"
   annotations:
+    # The dashboard reads these three from the Template, not from the
+    # ServingRuntime inside it. Without them the runtime never appears.
+    opendatahub.io/apiProtocol: "REST"
+    opendatahub.io/modelServingSupport: '["single"]'
+    opendatahub.io/model-type: '["predictive"]'
     openshift.io/display-name: "R (RDS / qs2 / RData)"
     openshift.io/provider-display-name: "kserveR"
     description: "Serves models fitted in R over the V2 Open Inference Protocol."
-    tags: "r,rds,kserve"
+    tags: "rhods,rhoai,kserve,servingruntime,r"
 objects:
   - apiVersion: serving.kserve.io/v1alpha1
     kind: ServingRuntime
@@ -22,7 +27,7 @@ objects:
         opendatahub.io/apiProtocol: "REST"
     spec:
       supportedModelFormats:
-        - name: r
+        - name: R
           version: "1"
           autoSelect: true
           priority: 1

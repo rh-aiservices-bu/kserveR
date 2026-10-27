@@ -6,8 +6,11 @@ metadata:
     serving.kserve.io/deploymentMode: RawDeployment
 spec:
   predictor:
+    labels:
+      app.openshift.io/runtime: r
+      app.openshift.io/runtime-version: "4.4.2"
     model:
       modelFormat:
-        name: r
+        name: R
       runtime: kserve-r-runtime
       storageUri: oci://quay.io/sara_banderby/kserver:test
