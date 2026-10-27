@@ -5,8 +5,6 @@ metadata:
   labels:
     opendatahub.io/dashboard: "true"
   annotations:
-    # The dashboard reads these three from the Template, not from the
-    # ServingRuntime inside it. Without them the runtime never appears.
     opendatahub.io/apiProtocol: "REST"
     opendatahub.io/modelServingSupport: '["single"]'
     opendatahub.io/model-type: '["predictive"]'
