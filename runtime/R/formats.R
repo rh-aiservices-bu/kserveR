@@ -43,7 +43,6 @@ load_rdata <- function(path) {
   ))
 }
 
-# A directory rather than a file, so only reachable via MODEL_FORMAT=vetiver.
 load_vetiver <- function(path) {
   dir <- if (dir.exists(path)) path else dirname(path)
   with_package("vetiver", function() {

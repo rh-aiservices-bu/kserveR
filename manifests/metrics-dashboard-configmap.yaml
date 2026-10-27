@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iris-rf-metrics-dashboard
+  namespace: kserver
+data:
+  supported: "true"
+  metrics: |
+    {
+      "config": [
+        {
+          "title": "Number of incoming requests",
+          "type": "REQUEST_COUNT",
+          "queries": [
+            {
+              "title": "Successful requests",
+              "query": "sum(increase(kserver_requests_total{namespace='kserver',model='iris-rf',path=~'/v2/models/.*/infer',status='200'}[5m]))"
+            },
+            {
+              "title": "Failed requests",
+              "query": "sum(increase(kserver_requests_total{namespace='kserver',model='iris-rf',path=~'/v2/models/.*/infer',status!='200'}[5m]))"
+            }
+          ]
+        },
+        {
+          "title": "Mean Model Latency",
+          "type": "MEAN_LATENCY",
+          "queries": [
+            {
+              "title": "Mean inference latency",
+              "query": "1000 * sum(rate(kserver_request_duration_seconds_sum{namespace='kserver',model='iris-rf',path=~'/v2/models/.*/infer'}[5m])) / sum(rate(kserver_request_duration_seconds_count{namespace='kserver',model='iris-rf',path=~'/v2/models/.*/infer'}[5m]))"
+            }
+          ]
+        },
+        {
+          "title": "CPU usage",
+          "type": "CPU_USAGE",
+          "queries": [
+            {
+              "title": "CPU usage",
+              "query": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace='kserver'} * on(namespace,pod) group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace='kserver', workload=~'iris-rf-predictor.*', workload_type=~'deployment'}) by (pod)"
+            }
+          ]
+        },
+        {
+          "title": "Memory usage",
+          "type": "MEMORY_USAGE",
+          "queries": [
+            {
+              "title": "Memory usage",
+              "query": "sum(container_memory_working_set_bytes{namespace='kserver', container!='', image!=''} * on(namespace,pod) group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace='kserver', workload=~'iris-rf-predictor.*', workload_type=~'deployment'}) by (pod)"
+            }
+          ]
+        }
+      ]
+    }

@@ -36,12 +36,6 @@ spec:
       env:
         - name: MODEL_DIR
           value: /mnt/models
-        # - name: MODEL_FORMAT
-        #   value: vetiver
-        # - name: MODEL_OBJECT
-        #   value: fit
-        # - name: MODEL_PACKAGES
-        #   value: caret
 
       resources:
         requests:

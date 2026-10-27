@@ -16,6 +16,9 @@ spec:
         name: R
       runtime: kserve-r-runtime
       storageUri: oci://quay.io/sara_banderby/kserver:test
+      env:
+        - name: MODEL_NAME
+          value: iris-rf
       resources:
         requests:
           cpu: "500m"

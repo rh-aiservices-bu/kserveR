@@ -6,8 +6,6 @@ bad_request <- function(fmt, ...) {
   )
 }
 
-# INT64/UINT64 become doubles: R has no 64-bit integer, and as.integer() would
-# silently return NA.
 coerce_v2 <- function(values, datatype, name) {
   switch(
     toupper(as.character(datatype)),
@@ -62,8 +60,6 @@ check_length <- function(tensor, shape, values) {
   }
 }
 
-# Columnar is the primary shape; a single 2-D tensor is read as a feature matrix.
-# A lone [N,1] stays columnar -- far likelier to be one column than one feature.
 inputs_to_dataframe <- function(inputs, schema) {
   if (!length(inputs)) stop(bad_request("request has no 'inputs'"))
 
@@ -167,8 +163,6 @@ check_required_columns <- function(frame, schema) {
   invisible(TRUE)
 }
 
-# I() keeps these as JSON arrays; without it auto_unbox collapses a length-1 shape
-# or single-row prediction into a bare scalar and the response stops being valid V2.
 make_output <- function(name, value, parameters = NULL) {
   if (is.factor(value)) value <- as.character(value)
 
@@ -190,8 +184,6 @@ make_output <- function(name, value, parameters = NULL) {
   output
 }
 
-# named list -> one output each; data.frame -> one per column; matrix -> [N,K];
-# vector -> a single "predictions" output.
 predictions_to_outputs <- function(predictions) {
   if (is.data.frame(predictions)) {
     return(unname(Map(make_output, names(predictions), as.list(predictions))))

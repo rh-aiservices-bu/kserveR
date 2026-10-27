@@ -1,15 +1,19 @@
 METRICS <- new.env(parent = emptyenv())
-METRICS$requests       <- list()
-METRICS$duration_sum   <- 0
-METRICS$duration_count <- 0
-METRICS$started        <- Sys.time()
+METRICS$requests  <- list()
+METRICS$durations <- list()
+METRICS$started   <- Sys.time()
 
 metrics_record <- function(path, status, seconds) {
   key <- paste(path, status, sep = "\u001f")
   previous <- METRICS$requests[[key]]
   METRICS$requests[[key]] <- if (is.null(previous)) 1L else previous + 1L
-  METRICS$duration_sum   <- METRICS$duration_sum + seconds
-  METRICS$duration_count <- METRICS$duration_count + 1L
+
+  duration <- METRICS$durations[[path]]
+  METRICS$durations[[path]] <- if (is.null(duration)) {
+    list(sum = seconds, count = 1L)
+  } else {
+    list(sum = duration$sum + seconds, count = duration$count + 1L)
+  }
   invisible(NULL)
 }
 
@@ -35,28 +39,31 @@ metrics_render <- function(model_name = MODEL_NAME) {
     "# TYPE kserver_requests_total counter"
   )
 
-  if (length(METRICS$requests)) {
-    for (key in names(METRICS$requests)) {
-      parts <- strsplit(key, "\u001f", fixed = TRUE)[[1L]]
-      lines <- c(lines, sprintf(
-        'kserver_requests_total{model="%s",path="%s",status="%s"} %d',
-        model, escape_label(parts[[1L]]), escape_label(parts[[2L]]),
-        METRICS$requests[[key]]
-      ))
-    }
-  } else {
-    lines <- c(lines, sprintf('kserver_requests_total{model="%s"} 0', model))
+  for (key in names(METRICS$requests)) {
+    parts <- strsplit(key, "\u001f", fixed = TRUE)[[1L]]
+    lines <- c(lines, sprintf(
+      'kserver_requests_total{model="%s",path="%s",status="%s"} %d',
+      model, escape_label(parts[[1L]]), escape_label(parts[[2L]]),
+      METRICS$requests[[key]]
+    ))
   }
 
   lines <- c(
     lines,
     "# HELP kserver_request_duration_seconds Time spent handling requests.",
-    "# TYPE kserver_request_duration_seconds summary",
-    sprintf('kserver_request_duration_seconds_sum{model="%s"} %.6f',
-            model, METRICS$duration_sum),
-    sprintf('kserver_request_duration_seconds_count{model="%s"} %d',
-            model, METRICS$duration_count)
+    "# TYPE kserver_request_duration_seconds summary"
   )
+  for (path in names(METRICS$durations)) {
+    duration <- METRICS$durations[[path]]
+    label <- escape_label(path)
+    lines <- c(
+      lines,
+      sprintf('kserver_request_duration_seconds_sum{model="%s",path="%s"} %.6f',
+              model, label, duration$sum),
+      sprintf('kserver_request_duration_seconds_count{model="%s",path="%s"} %d',
+              model, label, duration$count)
+    )
+  }
 
   paste0(paste(lines, collapse = "\n"), "\n")
 }
