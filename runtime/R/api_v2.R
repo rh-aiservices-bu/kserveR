@@ -64,10 +64,25 @@ error_handler <- function(req, res, err) {
   list(error = message_text)
 }
 
+# A pass-through parser bound to the content types clients actually send. The
+# handler parses the body itself so it can return 400 rather than 500 on malformed
+# JSON; without registering this, plumber rejects application/json outright with
+# "No suitable parser found to handle request body type".
+register_raw_body_parser <- function() {
+  plumber::register_parser(
+    "rawbody",
+    function(...) function(value, ...) value,
+    fixed = c("application/json", "application/octet-stream", "text/plain"),
+    verbose = FALSE
+  )
+}
+
 # Model name is not validated: a ServingRuntime cannot reliably template the
 # InferenceService name into its container, so strict matching yields spurious
 # 404s. We echo back whatever was asked for; MODEL_NAME drives metadata.
 build_router <- function(state) {
+  register_raw_body_parser()
+
   pr <- plumber::pr()
   pr <- plumber::pr_set_serializer(pr, json_serializer())
   pr <- plumber::pr_set_error(pr, error_handler)
@@ -100,12 +115,12 @@ build_router <- function(state) {
     response
   }
 
-  pr <- plumber::pr_post(pr, "/v2/models/<model_name>/infer", infer, parsers = "octet")
+  pr <- plumber::pr_post(pr, "/v2/models/<model_name>/infer", infer, parsers = "rawbody")
 
   pr <- plumber::pr_post(
     pr, "/v2/models/<model_name>/versions/<model_version>/infer",
     function(model_name, model_version, req) infer(model_name, req),
-    parsers = "octet"
+    parsers = "rawbody"
   )
 
   pr
