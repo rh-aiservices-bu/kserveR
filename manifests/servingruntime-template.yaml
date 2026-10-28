@@ -1,14 +1,14 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: kserve-r-runtime-template
+  name: kserve-r-runtime-ubi9-template
   labels:
     opendatahub.io/dashboard: "true"
   annotations:
     opendatahub.io/apiProtocol: "REST"
     opendatahub.io/modelServingSupport: '["single"]'
     opendatahub.io/model-type: '["predictive"]'
-    openshift.io/display-name: "R (RDS / qs2 / RData)"
+    openshift.io/display-name: "R (UBI9)"
     openshift.io/provider-display-name: "kserveR"
     description: "Serves models fitted in R over the V2 Open Inference Protocol."
     tags: "rhods,rhoai,kserve,servingruntime,r"
@@ -16,13 +16,13 @@ objects:
   - apiVersion: serving.kserve.io/v1alpha1
     kind: ServingRuntime
     metadata:
-      name: kserve-r-runtime
+      name: kserve-r-runtime-ubi9
       labels:
         opendatahub.io/dashboard: "true"
       annotations:
-        openshift.io/display-name: "R (RDS / qs2 / RData)"
-        opendatahub.io/template-name: kserve-r-runtime-template
-        opendatahub.io/template-display-name: "R (RDS / qs2 / RData)"
+        openshift.io/display-name: "R (UBI9)"
+        opendatahub.io/template-name: kserve-r-runtime-ubi9-template
+        opendatahub.io/template-display-name: "R (UBI9)"
         opendatahub.io/modelServingSupport: '["single"]'
         opendatahub.io/apiProtocol: "REST"
     spec:
@@ -40,7 +40,7 @@ objects:
       multiModel: false
       containers:
         - name: kserve-container
-          image: quay.io/sara_banderby/kserver:latest
+          image: quay.io/sara_banderby/kserver:ubi9
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

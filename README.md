@@ -17,8 +17,21 @@ podman build \
 podman push quay.io/yourorg/kserve-r-runtime:0.1.0
 ```
 
+UBI9 with Posit's prebuilt R RPM, and CRAN packages installed as binaries from
+Posit Package Manager — so the build is minutes rather than an hour. x86_64 only,
+since Posit does not publish an aarch64 RPM for RHEL 9.
+
 The baked package list is the `PACKAGES` vector at the top of
-`runtime/install-packages.R`.
+`runtime/install-packages.R`. Build args: `R_VERSION` (default `4.4.2`, must be a
+version Posit publishes) and `CRAN_REPO`.
+
+`rocker/` holds an alternative build on `rocker/r-ver` with its own manifests. It
+works and builds on any architecture, but is Debian-based rather than UBI. Build
+it from the repo root so `COPY runtime/` resolves:
+
+```bash
+podman build -t quay.io/yourorg/kserve-r-runtime:rocker -f rocker/Containerfile .
+```
 
 ---
 

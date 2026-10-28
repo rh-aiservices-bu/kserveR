@@ -1,7 +1,7 @@
 apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
-  name: iris-rf
+  name: iris-rf-ubi9
   annotations:
     serving.kserve.io/deploymentMode: RawDeployment
 spec:
@@ -14,11 +14,11 @@ spec:
     model:
       modelFormat:
         name: R
-      runtime: kserve-r-runtime
+      runtime: kserve-r-runtime-ubi9
       storageUri: oci://quay.io/sara_banderby/kserver:test
       env:
         - name: MODEL_NAME
-          value: iris-rf
+          value: iris-rf-ubi9
       resources:
         requests:
           cpu: "500m"

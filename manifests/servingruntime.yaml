@@ -1,13 +1,13 @@
 apiVersion: serving.kserve.io/v1alpha1
 kind: ServingRuntime
 metadata:
-  name: kserve-r-runtime
+  name: kserve-r-runtime-ubi9
   labels:
     opendatahub.io/dashboard: "true"
   annotations:
-    openshift.io/display-name: "R (RDS / qs2 / RData)"
-    opendatahub.io/template-name: kserve-r-runtime-template
-    opendatahub.io/template-display-name: "R (RDS / qs2 / RData)"
+    openshift.io/display-name: "R (UBI9)"
+    opendatahub.io/template-name: kserve-r-runtime-ubi9-template
+    opendatahub.io/template-display-name: "R (UBI9)"
     opendatahub.io/modelServingSupport: '["single"]'
     opendatahub.io/apiProtocol: "REST"
 spec:
@@ -28,7 +28,7 @@ spec:
 
   containers:
     - name: kserve-container
-      image: quay.io/sara_banderby/kserver:latest
+      image: quay.io/sara_banderby/kserver:ubi9
       imagePullPolicy: Always
 
       ports:
@@ -46,6 +46,7 @@ spec:
         limits:
           cpu: "2"
           memory: 4Gi
+
       startupProbe:
         httpGet:
           path: /v2/health/ready
