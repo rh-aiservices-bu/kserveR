@@ -159,12 +159,11 @@ Set these in the `ServingRuntime`, or per-model in the `InferenceService`.
 ```bash
 Rscript examples/iris-rf/train.R                  # fit the example model
 MODEL_DIR=examples/iris-rf MODEL_NAME=iris-rf \
-  Rscript runtime/server.R                        # serve it, no container
+  Rscript runtime/server.R                        
 
 Rscript -e 'testthat::test_dir("tests/testthat", stop_on_failure = TRUE)'
 ./tests/smoke.sh                                  # end-to-end
 ```
-
 
 ```bash
 podman run --rm -p 8080:8080 --user 1000650000 \
@@ -178,5 +177,5 @@ podman run --rm -p 8080:8080 --user 1000650000 \
 
 - **Single-threaded.** Plumber sits on `httpuv`; scale with replicas.
 - **No `/metrics` endpoint yet.**
-- **Single model per pod.** `multiModel: false`; ModelMesh is out of scope.
+- **Single model per pod.** `multiModel: false.
 - **No GPU support.**

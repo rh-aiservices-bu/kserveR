@@ -9,46 +9,50 @@ data:
     {
       "config": [
         {
-          "title": "Number of incoming requests",
+          "title": "Requests per 5 minutes",
           "type": "REQUEST_COUNT",
           "queries": [
             {
-              "title": "Successful requests",
-              "query": "sum(increase(kserver_requests_total{namespace='kserver',model='iris-rf',path=~'/v2/models/.*/infer',status='200'}[5m]))"
+              "title": "Number of successful incoming requests",
+              "query": "round(sum(increase(model_infer_request_success_total{namespace='kserver', pod=~'iris-rf-predictor-.*'}[5m])))"
             },
             {
-              "title": "Failed requests",
-              "query": "sum(increase(kserver_requests_total{namespace='kserver',model='iris-rf',path=~'/v2/models/.*/infer',status!='200'}[5m]))"
+              "title": "Number of failed incoming requests",
+              "query": "round(sum(increase(model_infer_request_failure_total{namespace='kserver', pod=~'iris-rf-predictor-.*'}[5m])))"
             }
           ]
         },
         {
-          "title": "Mean Model Latency",
+          "title": "Average response time (ms)",
           "type": "MEAN_LATENCY",
           "queries": [
             {
-              "title": "Mean inference latency",
-              "query": "1000 * sum(rate(kserver_request_duration_seconds_sum{namespace='kserver',model='iris-rf',path=~'/v2/models/.*/infer'}[5m])) / sum(rate(kserver_request_duration_seconds_count{namespace='kserver',model='iris-rf',path=~'/v2/models/.*/infer'}[5m]))"
+              "title": "Average inference latency",
+              "query": "sum by (pod) (rate(model_infer_request_duration_sum{namespace='kserver', pod=~'iris-rf-predictor-.*'}[1m])) / sum by (pod) (rate(model_infer_request_duration_count{namespace='kserver', pod=~'iris-rf-predictor-.*'}[1m]))"
+            },
+            {
+              "title": "Average e2e latency",
+              "query": "sum by (pod) (rate(rest_server_request_duration_seconds_sum{namespace='kserver', pod=~'iris-rf-predictor-.*', path='/v2/models/{model_name}/infer'}[1m])) / sum by (pod) (rate(rest_server_request_duration_seconds_count{namespace='kserver', pod=~'iris-rf-predictor-.*', path='/v2/models/{model_name}/infer'}[1m]))"
             }
           ]
         },
         {
-          "title": "CPU usage",
+          "title": "CPU utilization %",
           "type": "CPU_USAGE",
           "queries": [
             {
               "title": "CPU usage",
-              "query": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace='kserver'} * on(namespace,pod) group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace='kserver', workload=~'iris-rf-predictor.*', workload_type=~'deployment'}) by (pod)"
+              "query": "sum(pod:container_cpu_usage:sum{namespace='kserver', pod=~'iris-rf-predictor-.*'})/sum(kube_pod_resource_limit{resource='cpu', pod=~'iris-rf-predictor-.*', namespace='kserver'})"
             }
           ]
         },
         {
-          "title": "Memory usage",
+          "title": "Memory utilization %",
           "type": "MEMORY_USAGE",
           "queries": [
             {
               "title": "Memory usage",
-              "query": "sum(container_memory_working_set_bytes{namespace='kserver', container!='', image!=''} * on(namespace,pod) group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{namespace='kserver', workload=~'iris-rf-predictor.*', workload_type=~'deployment'}) by (pod)"
+              "query": "sum(container_memory_working_set_bytes{namespace='kserver', pod=~'iris-rf-predictor-.*'})/sum(kube_pod_resource_limit{resource='memory', pod=~'iris-rf-predictor-.*', namespace='kserver'})"
             }
           ]
         }
