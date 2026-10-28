@@ -1,8 +1,8 @@
 # kserveR
 
 A custom [KServe](https://kserve.github.io/website/) `ServingRuntime` for models
-fitted in R, speaking the V2 Open Inference Protocol. Deploy an R model with the
-same `InferenceService` YAML you would use for sklearn or XGBoost.
+fitted in R, speaking the V2 Open Inference Protocol. Deploy an R model with an
+ `InferenceService` YAML. 
 
 ---
 
