@@ -8,9 +8,13 @@ ARG CRAN_REPO=https://packagemanager.posit.co/cran/__linux__/rhel9/latest
 
 ENV R_VERSION=${R_VERSION}
 
+ENV TZ=UTC
+
 RUN dnf -y upgrade --nodocs --disableplugin=subscription-manager \
  && dnf install -y --nodocs --disableplugin=subscription-manager \
+      tzdata \
       https://cdn.rstudio.com/r/rhel-9/pkgs/R-${R_VERSION}-1-1.x86_64.rpm \
+ && ln -sf /usr/share/zoneinfo/UTC /etc/localtime \
  && dnf clean all && rm -rf /var/cache/dnf \
  && ln -s /opt/R/${R_VERSION}/bin/R /usr/local/bin/R \
  && ln -s /opt/R/${R_VERSION}/bin/Rscript /usr/local/bin/Rscript

@@ -5,7 +5,7 @@ PACKAGES <- c(
   "qs2", "xgboost", "vetiver", "pins"
 )
 
-options(Ncpus = max(1L, parallel::detectCores()), warn = 2L)
+options(Ncpus = max(1L, parallel::detectCores()))
 
 cat("------------------------------------------------------------\n")
 cat(sprintf("R        : %s on %s\n", getRversion(), R.version$platform))
