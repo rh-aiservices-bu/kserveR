@@ -1,5 +1,7 @@
 # kserveR
 
+Welcome R programmer, to the kserveR repo! Here, you will find instruction on how to either build the custom R kserve runtime (or download a prebuilt image) and deploy it in your OpenShift AI instance with full UI integration.
+
 A custom [KServe](https://kserve.github.io/website/) `ServingRuntime` for models
 fitted in R, speaking the V2 Open Inference Protocol. Deploy an R model with an
  `InferenceService` YAML. 
@@ -36,7 +38,7 @@ podman build -t quay.io/yourorg/kserve-r-runtime:rocker -f rocker/Containerfile 
 
 ## 2. Install the runtime
 
-If you built the image yourself, replace the image url to your own one inside of `manifests/servingruntime-template.yaml`, then apply it once
+If you built the image yourself and pushed to your own repo, replace the image url to your own one inside of `manifests/servingruntime-template.yaml`, then apply it once
 for the whole cluster:
 
 ```bash
@@ -44,7 +46,9 @@ oc apply -n redhat-ods-applications -f manifests/servingruntime-template.yaml
 ```
 
 The runtime is now available to every project and selectable in the OpenShift AI
-dashboard. Per default its pulling from quay.io/sara_banderby/kserver:latest. 
+dashboard. If you dont wanna build the image, but pull down a prebuilt one it get pulls `quay.io/sara_banderby/kserver:ubi9` by default if you dont change the image url. 
+
+OBS! You require admin persmission to import a custom model serving runtime in OpenShift AI. 
 
 ---
 
@@ -72,7 +76,7 @@ podman build -t quay.io/yourorg/iris-rf-modelcar:0.1.0 \
 podman push quay.io/yourorg/iris-rf-modelcar:0.1.0
 ```
 
-The model has to exist under /models/ in the modelcar for the runtime to be able to access it.
+The model file has to exist under /models/ in the modelcar for the runtime to be able to access it.
 
 ```yaml
 storageUri: oci://quay.io/yourorg/iris-rf-modelcar:0.1.0
