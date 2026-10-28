@@ -17,9 +17,16 @@ flush.console()
 
 install.packages(PACKAGES)
 
-ok <- vapply(PACKAGES, requireNamespace, logical(1), quietly = TRUE)
-if (any(!ok)) {
-  cat(sprintf("FAILED: %s\n", paste(PACKAGES[!ok], collapse = ", ")))
+load_error <- function(pkg) {
+  tryCatch({ loadNamespace(pkg); NA_character_ },
+           error = function(e) conditionMessage(e))
+}
+
+errors <- vapply(PACKAGES, load_error, character(1))
+failed <- PACKAGES[!is.na(errors)]
+
+if (length(failed)) {
+  for (pkg in failed) cat(sprintf("FAILED %s: %s\n", pkg, errors[[pkg]]))
   quit(status = 1L)
 }
 
