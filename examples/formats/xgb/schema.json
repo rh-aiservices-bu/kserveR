@@ -1,0 +1,20 @@
+{
+  "inputs": [
+    {
+      "name": "Sepal.Length",
+      "datatype": "FP64"
+    },
+    {
+      "name": "Sepal.Width",
+      "datatype": "FP64"
+    },
+    {
+      "name": "Petal.Length",
+      "datatype": "FP64"
+    },
+    {
+      "name": "Petal.Width",
+      "datatype": "FP64"
+    }
+  ]
+}

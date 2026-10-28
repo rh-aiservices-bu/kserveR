@@ -1,0 +1,5 @@
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+
+COPY model.rds /models/model.rds
+
+USER 1001
