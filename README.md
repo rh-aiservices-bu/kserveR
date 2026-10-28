@@ -24,30 +24,63 @@ The baked package list is the `PACKAGES` vector at the top of
 
 ## 2. Install the runtime
 
-Once per namespace. Replace the image first:
-
-```bash
-oc apply -f manifests/servingruntime.yaml
-```
-
-To make it selectable in the OpenShift AI dashboard rather than YAML-only:
+If you built the image yourself, replace the image url to your own one inside of `manifests/servingruntime-template.yaml`, then apply it once
+for the whole cluster:
 
 ```bash
 oc apply -n redhat-ods-applications -f manifests/servingruntime-template.yaml
 ```
 
+The runtime is now available to every project and selectable in the OpenShift AI
+dashboard. Per default its pulling from quay.io/sara_banderby/kserver:latest. 
+
 ---
 
 ## 3. Deploy a model
 
-Upload the model to object storage as a **prefix**, not a single file:
+Two ways to get the model to the pod.
+
+### Modelcar (OCI image)
+
+The model travels as a container image. `examples/iris-rf/Containerfile`:
+
+```containerfile
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+
+COPY model.rds /models/model.rds
+
+USER 1001
+```
+
+```bash
+Rscript examples/iris-rf/train.R
+
+podman build -t quay.io/yourorg/iris-rf-modelcar:0.1.0 \
+  -f examples/iris-rf/Containerfile examples/iris-rf
+podman push quay.io/yourorg/iris-rf-modelcar:0.1.0
+```
+
+The model has to exist under /models/ in the modelcar for the runtime to be able to access it.
+
+```yaml
+storageUri: oci://quay.io/yourorg/iris-rf-modelcar:0.1.0
+```
+You can also pull the test model container from quay.io/sara_banderby/kserver:test.
+
+### Object storage
+
+Point at a **prefix**, not a single file:
 
 ```
 s3://your-bucket/models/iris-rf/
   model.rds
 ```
 
-Then:
+```yaml
+storageUri: s3://your-bucket/models/iris-rf/
+```
+
+### The InferenceService
 
 ```yaml
 apiVersion: serving.kserve.io/v1beta1
@@ -58,15 +91,30 @@ metadata:
     serving.kserve.io/deploymentMode: RawDeployment
 spec:
   predictor:
+    labels:
+      app.openshift.io/runtime: r
+      app.openshift.io/runtime-version: "4.4.2"
+    minReplicas: 1
+    maxReplicas: 1
     model:
       modelFormat:
-        name: r
+        name: R
       runtime: kserve-r-runtime
-      storageUri: s3://your-bucket/models/iris-rf/
+      storageUri: oci://quay.io/yourorg/iris-rf-modelcar:0.1.0 #change this to your own or use the example template
+      env:
+        - name: MODEL_NAME
+          value: iris-rf
+      resources:
+        requests:
+          cpu: "500m"
+          memory: 1Gi
+        limits:
+          cpu: "2"
+          memory: 4Gi
 ```
 
 ```bash
-oc apply -f inferenceservice.yaml
+oc apply -f manifests/inferenceservice.yaml
 oc get isvc iris-rf -w
 ```
 
@@ -90,9 +138,9 @@ curl -X POST http://iris-rf-predictor/v2/models/iris-rf/infer \
    "data":["setosa","virginica"]}]}
 ```
 
-One tensor per column, named for the column. For matrix-oriented models
-(xgboost, glmnet) send a single 2-D tensor named `input` with shape `[rows, cols]`
-instead — column order then follows the model's schema.
+One tensor per column, named for the column. For matrix-oriented models such as
+glmnet, send a single 2-D tensor named `input` with shape `[rows, cols]` instead
+— column order then follows the model's schema.
 
 Also available: `GET /v2/models/<name>` for metadata, `/v2/health/{live,ready}`.
 
@@ -111,11 +159,10 @@ Also available: `GET /v2/models/<name>` for metadata, `/v2/health/{live,ready}`.
 ## Supported models
 
 Any `.rds` whose object has a `predict()` method: `lm`, `glm`, randomForest,
-ranger, glmnet, rpart, nnet, e1071, MASS, xgboost, caret `train`, tidymodels
+ranger, glmnet, rpart, nnet, e1071, MASS, caret `train`, tidymodels
 `workflow`/`model_fit`.
 
-Also `.qs2`, `.qs`, `.rda`/`.RData`, and xgboost's native `.ubj`/`.model`/`.xgb`.
-Name the file `model.<ext>` or set `MODEL_FILE`.
+Also `.qs2`, `.qs` and `.rda`/`.RData`. Name the file `model.<ext>`.
 
 Factor columns are rebuilt against the levels seen during training, so a request
 sending levels in a different order still predicts correctly. Unseen levels are
@@ -131,7 +178,7 @@ Set these in the `ServingRuntime`, or per-model in the `InferenceService`.
 |---|---|---|
 | `MODEL_NAME` | `model` | name advertised in metadata |
 | `MODEL_FILE` | — | explicit filename, overriding discovery |
-| `MODEL_FORMAT` | — | force a loader, e.g. `vetiver` |
+| `MODEL_FORMAT` | — | force a loader instead of inferring it from the extension |
 | `MODEL_OBJECT` | — | which object to take from a multi-object `.RData` |
 | `MODEL_PACKAGES` | — | namespaces to load for `predict` dispatch |
 | `PREDICT_TYPE` | — | passed to `predict(..., type=)`, e.g. `prob` |
@@ -176,6 +223,8 @@ podman run --rm -p 8080:8080 --user 1000650000 \
 ## Limitations
 
 - **Single-threaded.** Plumber sits on `httpuv`; scale with replicas.
-- **No `/metrics` endpoint yet.**
-- **Single model per pod.** `multiModel: false.
+- **Not shown in the RHOAI Endpoint performance UI tab.** `/metrics` works and is
+  scraped, but odh-model-controller only writes dashboard queries for runtimes it
+  recognises.
+- **Single model per pod.** `multiModel: false`.
 - **No GPU support.**
