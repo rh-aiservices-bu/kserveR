@@ -8,7 +8,7 @@ metadata:
     opendatahub.io/apiProtocol: "REST"
     opendatahub.io/modelServingSupport: '["single"]'
     opendatahub.io/model-type: '["predictive"]'
-    openshift.io/display-name: "R (UBI9)"
+    openshift.io/display-name: "R (RDS / qs2 / RData)"
     openshift.io/provider-display-name: "kserveR"
     description: "Serves models fitted in R over the V2 Open Inference Protocol."
     tags: "rhods,rhoai,kserve,servingruntime,r"
@@ -20,9 +20,9 @@ objects:
       labels:
         opendatahub.io/dashboard: "true"
       annotations:
-        openshift.io/display-name: "R (UBI9)"
+        openshift.io/display-name: "R (RDS / qs2 / RData)"
         opendatahub.io/template-name: kserve-r-runtime-ubi9-template
-        opendatahub.io/template-display-name: "R (UBI9)"
+        opendatahub.io/template-display-name: "R (RDS / qs2 / RData)"
         opendatahub.io/modelServingSupport: '["single"]'
         opendatahub.io/apiProtocol: "REST"
     spec:

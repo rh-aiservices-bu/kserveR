@@ -1,14 +1,18 @@
 # kserveR
 
-Welcome R programmer, to the kserveR repo! Here, you will find instruction on how to either build the custom R kserve runtime (or download a prebuilt image) and deploy it in your OpenShift AI instance with full UI integration.
+Welcome R programmer, to the kserveR repo! 
+
+Here, you will find instruction on how to either build the custom R kserve runtime (or download a prebuilt image) and deploy it in your OpenShift AI instance with full UI integration.
 
 A custom [KServe](https://kserve.github.io/website/) `ServingRuntime` for models
 fitted in R, speaking the V2 Open Inference Protocol. Deploy an R model with an
  `InferenceService` YAML. 
 
+![An R model served by kserveR in the OpenShift topology view](images/topology-view-openshift.png)
+
 ---
 
-## 1. Build the image
+## 1. Build the custom image
 
 ```bash
 podman build \
@@ -27,12 +31,7 @@ The baked package list is the `PACKAGES` vector at the top of
 version Posit publishes) and `CRAN_REPO`.
 
 `rocker/` holds an alternative build on `rocker/r-ver` with its own manifests. It
-works and builds on any architecture, but is Debian-based rather than UBI. Build
-it from the repo root so `COPY runtime/` resolves:
-
-```bash
-podman build -t quay.io/yourorg/kserve-r-runtime:rocker -f rocker/Containerfile .
-```
+works and builds on any architecture and is debian based.
 
 ---
 
@@ -133,6 +132,16 @@ spec:
 oc apply -f manifests/inferenceservice.yaml
 oc get isvc iris-rf -w
 ```
+
+### From the dashboard
+
+Pick the R runtime and point it at the model:
+
+![Deploying an R model from the OpenShift AI dashboard](images/ui-deployment.png)
+
+Once it reports Ready:
+
+![The deployed R model in the OpenShift AI dashboard](images/ui-deployed.png)
 
 ---
 

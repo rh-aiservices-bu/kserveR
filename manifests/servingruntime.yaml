@@ -5,9 +5,9 @@ metadata:
   labels:
     opendatahub.io/dashboard: "true"
   annotations:
-    openshift.io/display-name: "R (UBI9)"
+    openshift.io/display-name: "R (RDS / qs2 / RData)"
     opendatahub.io/template-name: kserve-r-runtime-ubi9-template
-    opendatahub.io/template-display-name: "R (UBI9)"
+    opendatahub.io/template-display-name: "R (RDS / qs2 / RData)"
     opendatahub.io/modelServingSupport: '["single"]'
     opendatahub.io/apiProtocol: "REST"
 spec:
