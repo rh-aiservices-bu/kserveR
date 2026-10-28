@@ -1,52 +1,33 @@
-FROM registry.access.redhat.com/ubi9/ubi:latest AS builder
-
-ARG CRAN_REPO=https://cloud.r-project.org
-
-RUN dnf install -y --nodocs --setopt=install_weak_deps=False \
-      --disableplugin=subscription-manager \
-      https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
- && dnf -y upgrade --nodocs --disableplugin=subscription-manager \
- && dnf install -y --nodocs --setopt=install_weak_deps=False \
-      --disableplugin=subscription-manager \
-      --enablerepo=ubi-9-codeready-builder-rpms \
-      R-core R-core-devel \
-      gcc gcc-c++ gcc-gfortran make \
-      flexiblas-devel libtirpc-devel \
-      openssl-devel libcurl-devel libxml2-devel \
-      zlib-devel bzip2-devel xz-devel pcre2-devel libicu-devel \
- && dnf clean all && rm -rf /var/cache/dnf
-
-RUN mkdir -p /opt/kserve-r/library \
- && printf '%s\n' \
-      'options(repos = c(CRAN = "'"${CRAN_REPO}"'"), download.file.method = "libcurl")' \
-      '.libPaths(c("/opt/kserve-r/library", .libPaths()))' \
-      >> /usr/lib64/R/etc/Rprofile.site
-
-COPY runtime/install-packages.R /tmp/install-packages.R
-RUN Rscript /tmp/install-packages.R
-
-FROM registry.access.redhat.com/ubi9/ubi:latest AS runtime
+FROM registry.access.redhat.com/ubi9/ubi:latest
 
 LABEL version="0.1.0"
 LABEL maintainer="Sara Banderby <abanderb@redhat.com>"
 
-RUN dnf install -y --nodocs --setopt=install_weak_deps=False \
-      --disableplugin=subscription-manager \
-      https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
- && dnf -y upgrade --nodocs --disableplugin=subscription-manager \
- && dnf install -y --nodocs --setopt=install_weak_deps=False \
-      --disableplugin=subscription-manager \
-      R-core \
-      flexiblas libtirpc libgomp \
-      openssl-libs libcurl libxml2 \
-      zlib bzip2-libs xz-libs pcre2 libicu \
- && dnf clean all && rm -rf /var/cache/dnf
+ARG R_VERSION=4.4.2
+ARG CRAN_REPO=https://packagemanager.posit.co/cran/__linux__/rhel9/latest
 
-COPY --from=builder /opt/kserve-r/library /opt/kserve-r/library
+ENV R_VERSION=${R_VERSION}
+
+RUN dnf -y upgrade --nodocs --disableplugin=subscription-manager \
+ && dnf install -y --nodocs --disableplugin=subscription-manager \
+      https://cdn.rstudio.com/r/rhel-9/pkgs/R-${R_VERSION}-1-1.x86_64.rpm \
+ && dnf clean all && rm -rf /var/cache/dnf \
+ && ln -s /opt/R/${R_VERSION}/bin/R /usr/local/bin/R \
+ && ln -s /opt/R/${R_VERSION}/bin/Rscript /usr/local/bin/Rscript
+
+RUN mkdir -p /opt/kserve-r/library \
+ && printf '%s\n' \
+      'options(repos = c(CRAN = "'"${CRAN_REPO}"'"), download.file.method = "libcurl")' \
+      'options(HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os)))' \
+      '.libPaths(c("/opt/kserve-r/library", .libPaths()))' \
+      >> /opt/R/${R_VERSION}/lib/R/etc/Rprofile.site
+
+COPY runtime/install-packages.R /tmp/install-packages.R
+RUN Rscript /tmp/install-packages.R
+
 COPY runtime/ /opt/kserve-r/
 
-ENV R_LIBS_SITE=/opt/kserve-r/library \
-    RUNTIME_HOME=/opt/kserve-r \
+ENV RUNTIME_HOME=/opt/kserve-r \
     MODEL_DIR=/mnt/models \
     SERVER_HOST=0.0.0.0 \
     SERVER_PORT=8080
@@ -55,9 +36,7 @@ ENV HOME=/tmp \
     RENV_PATHS_CACHE=/tmp/renv-cache \
     R_LIBS_USER=/tmp/R-libs
 
-RUN printf '%s\n' '.libPaths(c("/opt/kserve-r/library", .libPaths()))' \
-      >> /usr/lib64/R/etc/Rprofile.site \
- && chmod +x /opt/kserve-r/entrypoint.sh \
+RUN chmod +x /opt/kserve-r/entrypoint.sh \
  && chgrp -R 0 /opt/kserve-r \
  && chmod -R g=u /opt/kserve-r
 
