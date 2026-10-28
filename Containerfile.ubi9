@@ -1,12 +1,14 @@
 FROM registry.access.redhat.com/ubi9/ubi:latest AS builder
 
-ARG CRAN_REPO=https://packagemanager.posit.co/cran/__linux__/rhel9/latest
+ARG CRAN_REPO=https://cloud.r-project.org
 
 RUN dnf install -y --nodocs --setopt=install_weak_deps=False \
+      --disableplugin=subscription-manager \
       https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
- && /usr/bin/crb enable \
- && dnf -y upgrade --nodocs \
+ && dnf -y upgrade --nodocs --disableplugin=subscription-manager \
  && dnf install -y --nodocs --setopt=install_weak_deps=False \
+      --disableplugin=subscription-manager \
+      --enablerepo=ubi-9-codeready-builder-rpms \
       R-core R-core-devel \
       gcc gcc-c++ gcc-gfortran make \
       flexiblas-devel libtirpc-devel \
@@ -29,10 +31,11 @@ LABEL version="0.1.0"
 LABEL maintainer="Sara Banderby <abanderb@redhat.com>"
 
 RUN dnf install -y --nodocs --setopt=install_weak_deps=False \
+      --disableplugin=subscription-manager \
       https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
- && /usr/bin/crb enable \
- && dnf -y upgrade --nodocs \
+ && dnf -y upgrade --nodocs --disableplugin=subscription-manager \
  && dnf install -y --nodocs --setopt=install_weak_deps=False \
+      --disableplugin=subscription-manager \
       R-core \
       flexiblas libtirpc libgomp \
       openssl-libs libcurl libxml2 \
