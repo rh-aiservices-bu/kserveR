@@ -18,8 +18,7 @@ podman push quay.io/yourorg/kserve-r-runtime:0.1.0
 ```
 
 UBI9 with Posit's prebuilt R RPM, and CRAN packages installed as binaries from
-Posit Package Manager — so the build is minutes rather than an hour. x86_64 only,
-since Posit does not publish an aarch64 RPM for RHEL 9.
+Posit Package Manager.
 
 The baked package list is the `PACKAGES` vector at the top of
 `runtime/install-packages.R`. Build args: `R_VERSION` (default `4.4.2`, must be a
