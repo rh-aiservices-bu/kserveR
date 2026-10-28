@@ -8,9 +8,6 @@ same `InferenceService` YAML you would use for sklearn or XGBoost.
 
 ## 1. Build the image
 
-Build on an **x86_64** host — the cluster is amd64, and emulated builds on an
-arm64 Mac are slow.
-
 ```bash
 podman build \
   --platform linux/amd64 \
@@ -21,8 +18,7 @@ podman push quay.io/yourorg/kserve-r-runtime:0.1.0
 ```
 
 The baked package list is the `PACKAGES` vector at the top of
-`runtime/install-packages.R` — edit it there. Anything not baked in can still
-arrive via an `renv.lock` shipped alongside the model.
+`runtime/install-packages.R`.
 
 ---
 
@@ -169,8 +165,6 @@ Rscript -e 'testthat::test_dir("tests/testthat", stop_on_failure = TRUE)'
 ./tests/smoke.sh                                  # end-to-end
 ```
 
-Before releasing, run the image as an arbitrary UID — OpenShift does, and it is
-where permission bugs surface:
 
 ```bash
 podman run --rm -p 8080:8080 --user 1000650000 \
