@@ -4,6 +4,8 @@ metadata:
   name: iris-rf-ubi9
   annotations:
     serving.kserve.io/deploymentMode: RawDeployment
+    security.opendatahub.io/enable-auth: "true"
+    networking.kserve.io/visibility: exposed
 spec:
   predictor:
     labels:
