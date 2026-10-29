@@ -45,7 +45,7 @@ oc apply -n redhat-ods-applications -f manifests/servingruntime-template.yaml
 ```
 
 The runtime is now available to every project and selectable in the OpenShift AI
-dashboard. If you dont wanna build the image, but pull down a prebuilt one it get pulls `quay.io/sara_banderby/kserver:ubi9` by default if you dont change the image url. 
+dashboard. If you dont wanna build the image, but pull down a prebuilt one it get pulls `quay.io/sara_banderby/kserver-runtime:v1` by default if you dont change the image url. 
 
 OBS! You require admin persmission to import a custom model serving runtime in OpenShift AI. 
 
@@ -61,6 +61,8 @@ The model travels as a container image. `examples/iris-rf/Containerfile`:
 
 ```containerfile
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+
+RUN microdnf update -y && microdnf clean all && rm -rf /var/cache/yum
 
 COPY model.rds /models/model.rds
 
@@ -80,7 +82,7 @@ The model file has to exist under /models/ in the modelcar for the runtime to be
 ```yaml
 storageUri: oci://quay.io/yourorg/iris-rf-modelcar:0.1.0
 ```
-You can also pull the test model container from quay.io/sara_banderby/kserver:test.
+You can also pull the test model container from quay.io/sara_banderby/iris-modelcar:v1.
 
 ### Object storage
 
