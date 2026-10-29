@@ -28,7 +28,7 @@ spec:
 
   containers:
     - name: kserve-container
-      image: quay.io/sara_banderby/kserver:ubi9
+      image: quay.io/sara_banderby/kserver-runtime:v1
       imagePullPolicy: Always
 
       ports:

@@ -15,7 +15,7 @@ spec:
       modelFormat:
         name: R
       runtime: kserve-r-runtime-ubi9
-      storageUri: oci://quay.io/sara_banderby/kserver:test
+      storageUri: oci://quay.io/sara_banderby/iris-modelcar:v1
       env:
         - name: MODEL_NAME
           value: iris-rf-ubi9
