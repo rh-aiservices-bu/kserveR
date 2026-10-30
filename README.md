@@ -250,8 +250,11 @@ podman run --rm -p 8080:8080 --user 1000650000 \
 ## Limitations
 
 - **Single-threaded.** Plumber sits on `httpuv`; scale with replicas.
-- **Not shown in the RHOAI Endpoint performance UI tab.** `/metrics` works and is
-  scraped, but odh-model-controller only writes dashboard queries for runtimes it
-  recognises.
+- **Endpoint performance dashboard view relies on a workaround.** odh-model-controller only
+  writes dashboard queries for runtimes it recognises, and there is no `custom`
+  option — an unrecognised runtime gets `supported: false` and blank panels. The
+  ServingRuntime therefore carries `opendatahub.io/kserve-runtime: mlserver`,
+  because MLServer's queries use the same standard metric names this runtime
+  already emits (`model_infer_request_success_total` and others). 
 - **Single model per pod.** `multiModel: false`.
 - **No GPU support.**
