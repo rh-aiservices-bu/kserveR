@@ -24,7 +24,7 @@ podman push quay.io/yourorg/kserve-r-runtime:0.1.0
 ```
 
 UBI9 with Posit's prebuilt R RPM, and CRAN packages installed as binaries from
-Posit Package Manager.
+Posit Public Package Manager.
 
 The baked package list is the `PACKAGES` vector at the top of
 `runtime/install-packages.R`. Build args: `R_VERSION` (default `4.4.2`, must be a
