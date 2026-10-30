@@ -30,9 +30,6 @@ The baked package list is the `PACKAGES` vector at the top of
 `runtime/install-packages.R`. Build args: `R_VERSION` (default `4.4.2`, must be a
 version Posit publishes) and `CRAN_REPO`.
 
-`rocker/` holds an alternative build on `rocker/r-ver` with its own manifests. It
-works and builds on any architecture and is debian based.
-
 ---
 
 ## 2. Install the runtime
