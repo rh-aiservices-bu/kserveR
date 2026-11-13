@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: iris-rf-ubi9-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: iris-rf-ubi9-view
+rules:
+  - apiGroups: [serving.kserve.io]
+    resources: [inferenceservices]
+    resourceNames: [iris-rf-ubi9]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: iris-rf-ubi9-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: iris-rf-ubi9-view
+subjects:
+  - kind: ServiceAccount
+    name: iris-rf-ubi9-sa
+    namespace: 
+---
+# Kubernetes populates the token after this Secret is created.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: default-token-iris-rf-ubi9-sa
+  annotations:
+    kubernetes.io/service-account.name: iris-rf-ubi9-sa
+type: kubernetes.io/service-account-token
