@@ -10,12 +10,6 @@ training_xlevels <- function(model) {
   list()
 }
 
-# gbm keeps its terms in $Terms (capital T), so stats::terms() fails on it and
-# the usual $xlevels lookups come up empty. The same information lives in
-# $var.names / $var.type / $var.levels: var.type is 0 for a numeric column and
-# the level count for a categorical one, with the levels in $var.levels at the
-# matching index. Without this the runtime learns no factor levels, so incoming
-# strings stay character and predict.gbm silently coerces them to NA.
 gbm_xlevels <- function(model) {
   if (!inherits(model, "gbm") || is.null(model$var.names)) return(NULL)
 
