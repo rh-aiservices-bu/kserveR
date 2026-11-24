@@ -5,7 +5,36 @@ training_xlevels <- function(model) {
   if (!is.null(model$forest$xlevels)) {
     return(keep_character_levels(model$forest$xlevels))
   }
+  gbm <- gbm_xlevels(model)
+  if (!is.null(gbm)) return(gbm)
   list()
+}
+
+# gbm keeps its terms in $Terms (capital T), so stats::terms() fails on it and
+# the usual $xlevels lookups come up empty. The same information lives in
+# $var.names / $var.type / $var.levels: var.type is 0 for a numeric column and
+# the level count for a categorical one, with the levels in $var.levels at the
+# matching index. Without this the runtime learns no factor levels, so incoming
+# strings stay character and predict.gbm silently coerces them to NA.
+gbm_xlevels <- function(model) {
+  if (!inherits(model, "gbm") || is.null(model$var.names)) return(NULL)
+
+  cat_idx <- which(model$var.type > 0)
+  if (!length(cat_idx)) return(list())
+
+  stats::setNames(
+    lapply(cat_idx, function(i) as.character(model$var.levels[[i]])),
+    model$var.names[cat_idx]
+  )
+}
+
+gbm_predictors <- function(model) {
+  if (!inherits(model, "gbm") || is.null(model$var.names)) return(NULL)
+
+  stats::setNames(
+    ifelse(model$var.type > 0, "factor", "numeric"),
+    model$var.names
+  )
 }
 
 keep_character_levels <- function(xlevels) {
@@ -27,6 +56,9 @@ training_predictors <- function(model) {
       if (length(classes)) return(classes)
     }
   }
+
+  gbm <- gbm_predictors(model)
+  if (!is.null(gbm)) return(gbm)
 
   names_only <- NULL
   if (!is.null(model$forest$xlevels)) {

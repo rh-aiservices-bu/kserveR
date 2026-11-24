@@ -1,6 +1,6 @@
 PACKAGES <- c(
   "plumber", "jsonlite", "renv",
-  "randomForest", "ranger", "glmnet", "rpart", "nnet", "e1071", "MASS",
+  "randomForest", "ranger", "gbm", "glmnet", "rpart", "nnet", "e1071", "MASS",
   "caret", "parsnip", "workflows", "recipes", "hardhat",
   "qs2", "xgboost", "vetiver", "pins"
 )
